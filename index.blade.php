@@ -30,27 +30,6 @@ Dashboard
                     </div>
                 </div>
 
-                <style>
-                    /* hand cursor on every clickable chart element (they open the pages) */
-                    [x-ref="category"] .apexcharts-pie-area,
-                    [x-ref="category"] .apexcharts-legend-series,
-                    [x-ref="weeklyReport"] .apexcharts-area-series,
-                    [x-ref="weeklyReport"] .apexcharts-series-markers,
-                    [x-ref="weeklyReport"] .apexcharts-legend-series,
-                    [x-ref="monthlyReport"] .apexcharts-bar-area,
-                    [x-ref="monthlyReport"] .apexcharts-legend-series,
-                    [x-ref="serviceInfoStatus"] .apexcharts-pie-area,
-                    [x-ref="serviceInfoStatus"] .apexcharts-legend-series,
-                    [x-ref="newEnquiryStatus"] .apexcharts-pie-area,
-                    [x-ref="newEnquiryStatus"] .apexcharts-legend-series,
-                    [x-ref="serviceInfoLocation"] .apexcharts-bar-area,
-                    [x-ref="newEnquiryLocation"] .apexcharts-bar-area,
-                    [x-ref="serviceInfoZone"] .apexcharts-pie-area,
-                    [x-ref="serviceInfoZone"] .apexcharts-legend-series,
-                    [x-ref="newEnquiryZone"] .apexcharts-pie-area,
-                    [x-ref="newEnquiryZone"] .apexcharts-legend-series { cursor: pointer; }
-                </style>
-
                 <!-- Total Count -->
                 <div class="panel h-full">
                     <div class="flex items-center mb-5">
@@ -256,13 +235,13 @@ Dashboard
             <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-2">
                 <!-- Recent Service Info -->
                 <div class="panel h-full sm:col-span-2 xl:col-span-1 pb-0">
-                    <h5 class="font-semibold text-lg dark:text-white-light mb-5"><a href="{{ route('serviceInfo') }}" class="hover:text-primary">Recent Service Info</a></h5>
+                    <h5 class="font-semibold text-lg dark:text-white-light mb-5">Recent Service Info</h5>
 
                     <div class="perfect-scrollbar relative mb-4 h-[290px] pr-3 -mr-3">
                         <div class="text-sm cursor-pointer">
 
                         @foreach($dashboardData['recentData']['recentServiceInfo'] as $recentServiceInfo)
-                            <a href="{{ route('serviceInfo') }}" class="flex items-center py-1.5 relative group hover:text-primary">
+                            <div class="flex items-center py-1.5 relative group">
                                 <div class="bg-primary w-1.5 h-1.5 rounded-full ltr:mr-1 rtl:ml-1.5"></div>
                                 <div class="flex-1">S{{ $recentServiceInfo->id }} - {{ $recentServiceInfo->status }}</div>
                                 <div class="ltr:ml-auto rtl:mr-auto text-xs text-white-dark dark:text-gray-500">
@@ -270,7 +249,7 @@ Dashboard
                                         {{ \Carbon\Carbon::parse($recentServiceInfo->createdAt)->diffForHumans() }}
                                     <!-- </span> -->
                                 </div>
-                            </a>
+                            </div>
                         @endforeach
                         </div>
                     </div>
@@ -289,13 +268,13 @@ Dashboard
 
                   <!-- Recent New Enquiry -->
                 <div class="panel h-full sm:col-span-2 xl:col-span-1 pb-0">
-                    <h5 class="font-semibold text-lg dark:text-white-light mb-5"><a href="{{ route('newEnquiries') }}" class="hover:text-primary">Recent New Enquiry</a></h5>
+                    <h5 class="font-semibold text-lg dark:text-white-light mb-5">Recent New Enquiry</h5>
 
                     <div class="perfect-scrollbar relative mb-4 h-[290px] pr-3 -mr-3">
                         <div class="text-sm cursor-pointer">
 
                         @foreach($dashboardData['recentData']['recentNewEnquiry'] as $recentNewEnquiry)
-                            <a href="{{ route('newEnquiries') }}" class="flex items-center py-1.5 relative group hover:text-primary">
+                            <div class="flex items-center py-1.5 relative group">
                                 <div class="bg-primary w-1.5 h-1.5 rounded-full ltr:mr-1 rtl:ml-1.5"></div>
                                 <div class="flex-1">N{{ $recentNewEnquiry->id }} - {{ $recentNewEnquiry->status }}</div>
                                 <div class="ltr:ml-auto rtl:mr-auto text-xs text-white-dark dark:text-gray-500">
@@ -303,7 +282,7 @@ Dashboard
                                         {{ \Carbon\Carbon::parse($recentNewEnquiry->createdAt)->diffForHumans() }}
                                     <!-- </span> -->
                                 </div>
-                            </a>
+                            </div>
                         @endforeach
                         </div>
                     </div>
@@ -514,7 +493,7 @@ Dashboard
 
                 <div class="panel h-full xl:col-span-1">
                     <div class="flex items-center mb-5">
-                        <h5 class="font-semibold text-lg dark:text-white"><a href="{{ route('newEnquiries') }}" class="hover:text-primary">New Enquiry Status</a></h5>
+                        <h5 class="font-semibold text-lg dark:text-white">New Enquiry Status</h5>
                     </div>
                     <div class="overflow-hidden">
                         <div x-ref="newEnquiryStatus" class="bg-white dark:bg-black rounded-lg overflow-hidden"></div>
@@ -657,83 +636,6 @@ Dashboard
         // console.log(newEnquiryZone);
         // console.log(newEnquiryZoneCount);
         
-        // ---------- chart click navigation ----------
-        const SERVICE_INFO_URL = "{{ route('serviceInfo') }}";
-        const NEW_ENQUIRY_URL  = "{{ route('newEnquiries') }}";
-
-        // open a list page; optional filters are sent as query-string values
-        function goTo(baseUrl, params) {
-            const query = new URLSearchParams();
-            Object.keys(params || {}).forEach((key) => {
-                if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
-                    query.append(key, params[key]);
-                }
-            });
-            const qs = query.toString();
-            window.location.href = qs ? baseUrl + (baseUrl.indexOf('?') > -1 ? '&' : '?') + qs : baseUrl;
-        }
-
-        // events for a chart that belongs to ONE page (labelFn gives the filter value of the clicked item)
-        function pageEvents(baseUrl, filterKey, labelsFn) {
-            return {
-                dataPointSelection: function(event, chartContext, config) {
-                    if (config.dataPointIndex < 0) return;
-                    const labels = labelsFn();
-                    const params = {};
-                    params[filterKey] = labels[config.dataPointIndex];
-                    goTo(baseUrl, params);
-                },
-                legendClick: function(chartContext, seriesIndex) {
-                    const labels = labelsFn();
-                    if (seriesIndex < 0 || labels[seriesIndex] === undefined) { goTo(baseUrl); return; }
-                    const params = {};
-                    params[filterKey] = labels[seriesIndex];
-                    goTo(baseUrl, params);
-                },
-            };
-        }
-
-        // events for a chart with TWO series: series 0 = Service Info, series 1 = New Enquiry
-        // hoverMode = true (line/area chart): a click anywhere on the chart uses the point
-        // the tooltip is showing, so the user does not have to hit the thin line exactly
-        function twoSeriesEvents(filterKey, labelsFn, hoverMode) {
-            const open = (seriesIndex, dataPointIndex) => {
-                const baseUrl = seriesIndex === 0 ? SERVICE_INFO_URL : (seriesIndex === 1 ? NEW_ENQUIRY_URL : null);
-                if (!baseUrl) return;
-                const params = {};
-                if (dataPointIndex > -1) params[filterKey] = labelsFn()[dataPointIndex];
-                goTo(baseUrl, params);
-            };
-            const events = {
-                legendClick: function(chartContext, seriesIndex) {
-                    open(seriesIndex, -1);
-                },
-            };
-            if (hoverMode) {
-                events.click = function(event, chartContext, config) {
-                    const g = chartContext.w.globals;
-                    const series = config.seriesIndex > -1 ? config.seriesIndex : g.capturedSeriesIndex;
-                    const point  = config.dataPointIndex > -1 ? config.dataPointIndex : g.capturedDataPointIndex;
-                    if (series > -1) open(series, point);
-                };
-            } else {
-                events.dataPointSelection = function(event, chartContext, config) {
-                    open(config.seriesIndex, config.dataPointIndex);
-                };
-            }
-            return events;
-        }
-
-        const weeklyEvents          = () => twoSeriesEvents('date',  () => dates, true);
-        const monthlyEvents         = () => twoSeriesEvents('month', () => months, false);
-        const serviceStatusEvents   = () => pageEvents(SERVICE_INFO_URL, 'status',   () => serviceStatusLabel);
-        const enquiryStatusEvents   = () => pageEvents(NEW_ENQUIRY_URL,  'status',   () => newEnquiryStatusLabel);
-        const serviceLocationEvents = () => pageEvents(SERVICE_INFO_URL, 'location', () => serviceInfolocation);
-        const enquiryLocationEvents = () => pageEvents(NEW_ENQUIRY_URL,  'location', () => newEnquiryLocation);
-        const serviceZoneEvents     = () => pageEvents(SERVICE_INFO_URL, 'region',   () => serviceInfoZone);
-        const enquiryZoneEvents     = () => pageEvents(NEW_ENQUIRY_URL,  'region',   () => newEnquiryZone);
-        // ---------------------------------------------
-
         document.addEventListener("alpine:init", () => {
             Alpine.data("sales", () => ({
                 init() {
@@ -805,26 +707,16 @@ Dashboard
                     this.$watch('$store.app.theme', () => {
                         isDark = this.$store.app.theme === "dark" || this.$store.app
                             .isDarkMode ? true : false;
-                        const map = {
-                            weeklyReport: 'weeklyReportOptions',
-                            category: 'categoryOptions',
-                            monthlyReport: 'monthlyReportOptions',
-                            serviceInfoStatus: 'serviceInfoStatusOptions',
-                            newEnquiryStatus: 'newEnquiryStatusOptions',
-                            serviceInfoLocation: 'serviceInfoLocationOptions',
-                            newEnquiryLocation: 'newEnquiryLocationOptions',
-                            serviceInfoZone: 'serviceInfoZoneOptions',
-                            newEnquiryZone: 'newEnquiryZoneOptions',
-                        };
-                        Object.keys(map).forEach((chartName) => {
-                            if (this[chartName] && typeof this[chartName].updateOptions === 'function') {
-                                this[chartName].updateOptions(this[map[chartName]]);
-                            }
-                        });
+
+                        this.revenueChart.updateOptions(this.revenueChartOptions);
+                        this.salesByCategory.updateOptions(this.salesByCategoryOptions);
+                        this.dailySales.updateOptions(this.dailySalesOptions);
+                        this.totalOrders.updateOptions(this.totalOrdersOptions);
                     });
 
                     this.$watch('$store.app.rtlClass', () => {
                         isRtl = this.$store.app.rtlClass === "rtl" ? true : false;
+                        this.revenueChart.updateOptions(this.revenueChartOptions);
                     });
 
                 },
@@ -848,7 +740,6 @@ Dashboard
                             }
                         ],
                         chart: {
-                            events: weeklyEvents(),
                             height: 325,
                             type: "area",
                             fontFamily: 'Nunito, sans-serif',
@@ -966,8 +857,6 @@ Dashboard
                             },
                         },
                         tooltip: {
-                            shared: true,
-                            intersect: false,
                             marker: {
                                 show: true
                             },
@@ -996,24 +885,6 @@ Dashboard
                             type: 'donut',
                             height: 460,
                             fontFamily: 'Nunito, sans-serif',
-                            events: {
-                                // click on a coloured arc: 0 = Service Info, 1 = New Enquiry
-                                dataPointSelection: function(event, chartContext, config) {
-                                    if (config.dataPointIndex === 0) {
-                                        window.location.href = "{{ route('serviceInfo') }}";
-                                    } else if (config.dataPointIndex === 1) {
-                                        window.location.href = "{{ route('newEnquiries') }}";
-                                    }
-                                },
-                                // click on the legend name (Service Info / New Enquiry)
-                                legendClick: function(chartContext, seriesIndex, config) {
-                                    if (seriesIndex === 0) {
-                                        window.location.href = "{{ route('serviceInfo') }}";
-                                    } else if (seriesIndex === 1) {
-                                        window.location.href = "{{ route('newEnquiries') }}";
-                                    }
-                                },
-                            },
                         },
                         dataLabels: {
                             enabled: false
@@ -1030,9 +901,6 @@ Dashboard
                             position: 'bottom',
                             horizontalAlign: 'center',
                             fontSize: '14px',
-                            onItemClick: {
-                                toggleDataSeries: false
-                            },
                             markers: {
                                 width: 10,
                                 height: 10,
@@ -1106,7 +974,6 @@ Dashboard
                             data: monthlyNewEnquiry
                         }],
                         chart: {
-                            events: monthlyEvents(),
                             height: 300,
                             type: 'bar',
                             zoom: {
@@ -1162,7 +1029,6 @@ Dashboard
                     return {
                         series: serviceStatusCount,
                         chart: {
-                            events: serviceStatusEvents(),
                             height: 300,
                             type: 'pie',
                             zoom: {
@@ -1195,7 +1061,6 @@ Dashboard
                     return {
                         series: newEnquiryStatusCount,
                         chart: {
-                            events: enquiryStatusEvents(),
                             height: 300,
                             type: 'pie',
                             zoom: {
@@ -1231,7 +1096,6 @@ Dashboard
                             data: serviceInfoLocationCount,
                         }],
                         chart: {
-                            events: serviceLocationEvents(),
                             height: 300,
                             type: 'bar',
                             zoom: {
@@ -1280,7 +1144,6 @@ Dashboard
                             data: newEnquiryLocationCount,
                         }],
                         chart: {
-                            events: enquiryLocationEvents(),
                             height: 300,
                             type: 'bar',
                             zoom: {
@@ -1326,7 +1189,6 @@ Dashboard
                     return {
                         series: serviceInfoZoneCount,
                         chart: {
-                            events: serviceZoneEvents(),
                             height: 300,
                             type: 'donut',
                             zoom: {
@@ -1359,7 +1221,6 @@ Dashboard
                     return {
                         series: newEnquiryZoneCount,
                         chart: {
-                            events: enquiryZoneEvents(),
                             height: 300,
                             type: 'donut',
                             zoom: {
